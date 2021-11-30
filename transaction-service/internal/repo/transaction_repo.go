@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/charlesonunze/grpc-redis-envoy-example/transaction-service/internal/model"
+	"github.com/charlesonunze/grpc-nats-envoy/transaction-service/internal/model"
 	"gorm.io/gorm"
 )
 

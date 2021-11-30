@@ -1,12 +1,9 @@
-FROM golang:alpine AS build-env
-ENV GOPATH /go
-WORKDIR /go/src
-COPY . /go/src/user-service
-RUN cd /go/src/user-service && go build .
+FROM golang:alpine
 
-FROM alpine
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk*
-WORKDIR /app
-COPY --from=build-env /go/src/user-service/user-service /app
+WORKDIR /go/src/app
 
-ENTRYPOINT [ "./user-service" ]
+COPY . /go/src/app
+
+RUN go get -u ./...
+
+CMD ["go","run","main.go"]

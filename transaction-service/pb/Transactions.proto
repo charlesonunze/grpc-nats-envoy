@@ -5,7 +5,7 @@ package transaction;
 import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 
-option go_package = "github.com/charlesonunze/grpc-redis-envoy-example/transaction-service/pb";
+option go_package = "github.com/charlesonunze/grpc-nats-envoy/transaction-service/pb";
 
 service TransactionServiceRPC {
   rpc CreditAccount (CreditAccountRequest) returns (google.protobuf.Empty) {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charlesonunze/grpc-redis-envoy-example/transaction-service/internal/repo"
+	"github.com/charlesonunze/grpc-nats-envoy/transaction-service/internal/repo"
 	"github.com/golang-jwt/jwt"
 )
 

@@ -3,13 +3,14 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/charlesonunze/grpc-redis-envoy-example/user-service/internal/repo"
-	"github.com/go-redis/redis"
+	"github.com/charlesonunze/grpc-nats-envoy/user-service/internal/repo"
 	"github.com/golang-jwt/jwt"
+	"github.com/nats-io/nats.go"
 )
 
 // UserService - interface for the user service
@@ -20,24 +21,26 @@ type UserService interface {
 
 type userService struct {
 	repo repo.UserRepo
+	nc   *nats.Conn
 }
 
 // New - returns an instance of the UserService
-func New(repo repo.UserRepo) UserService {
+func New(repo repo.UserRepo, nc *nats.Conn) UserService {
 	return &userService{
 		repo: repo,
+		nc:   nc,
 	}
 }
 
 var (
-	mySigningKey = []byte(os.Getenv("SECRET_KEY"))
-	redisClient  = redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_URL"),
-		Password: os.Getenv("REDIS_PWD"),
-	})
+	mySigningKey           = []byte(os.Getenv("SECRET_KEY"))
 	GET_USER_BALANCE_TOPIC = "get_user_balance"
 	USER_BALANCE_TOPIC     = "user_balance"
 )
+
+func printMsg(m *nats.Msg) {
+	log.Printf("Received on USR-SVC [%s]: '%s'", m.Subject, string(m.Data))
+}
 
 // LoginUser - logs in the user and returns a jwt
 func (s *userService) LoginUser(ctx context.Context, name string) (string, error) {
@@ -68,33 +71,33 @@ func (s *userService) GetUserBalance(ctx context.Context, tkn string) (int32, er
 		return balance, err
 	}
 
-	// Wait for a single response
-	subscriber := redisClient.Subscribe(USER_BALANCE_TOPIC)
+	s.nc.Publish(GET_USER_BALANCE_TOPIC, []byte(userID))
 
-	// publish user id in topic
-	if err := redisClient.Publish(GET_USER_BALANCE_TOPIC, userID).Err(); err != nil {
-		panic(err)
+	// Channel Subscriber
+	ch := make(chan *nats.Msg)
+	_, err = s.nc.ChanSubscribe(USER_BALANCE_TOPIC, ch)
+	if err != nil {
+		fmt.Printf("err%v", err)
+		log.Fatal(err)
 	}
 
 	for {
-		msg, err := subscriber.ReceiveMessage()
-		if err != nil {
-			panic(err)
+		select {
+		case msg := <-ch:
+			data := string(msg.Data)
+			fmt.Println("USR - Received message from " + msg.Subject + " channel.")
+			fmt.Println("USR - payload " + data)
+
+			i, err := strconv.ParseInt(data, 10, 32)
+			if err != nil {
+				panic(err)
+			}
+
+			balance = int32(i)
+
+			return balance, nil
 		}
-
-		fmt.Println("USR - Received message from " + msg.Channel + " channel.")
-		fmt.Println("USR - payload " + msg.Payload)
-
-		i, err := strconv.ParseInt(msg.Payload, 10, 32)
-		if err != nil {
-			panic(err)
-		}
-
-		balance = int32(i)
-		break
 	}
-
-	return balance, nil
 }
 
 func verifyToken(tkn string) (string, error) {

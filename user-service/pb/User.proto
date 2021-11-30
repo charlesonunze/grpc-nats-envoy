@@ -4,7 +4,7 @@ package user;
 
 import "google/api/annotations.proto";
 
-option go_package = "github.com/charlesonunze/grpc-redis-envoy-example/user-service/pb";
+option go_package = "github.com/charlesonunze/grpc-nats-envoy/user-service/pb";
 
 service UserServiceRPC {
   rpc Login (LoginRequest) returns (LoginResponse) {
