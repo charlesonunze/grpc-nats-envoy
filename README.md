@@ -1,6 +1,10 @@
-# grpc-redis-envoy-example
+# grpc-nats-envoy
 
 json to rpc example with envoy, go, grpc, redis
+
+This repo is a mirror of [https://github.com/charlesonunze/grpc-redis-envoy-example](https://github.com/charlesonunze/grpc-redis-envoy-example)
+
+It replaces [redis](https://redis.io/) with [nats](https://nats.io/)
 
 ## Run
 
