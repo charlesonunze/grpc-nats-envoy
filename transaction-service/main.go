@@ -45,7 +45,7 @@ func main() {
 	defer db.CloseDB()
 
 	s := grpc.NewServer()
-	pb.RegisterTransactionServiceRPCServer(s, rpc.New(nc))
+	pb.RegisterTransactionServiceRPCServer(s, rpc.New())
 	reflection.Register(s)
 
 	address := "0.0.0.0:5060"

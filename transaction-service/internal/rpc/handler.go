@@ -7,7 +7,6 @@ import (
 	"github.com/charlesonunze/grpc-nats-envoy/transaction-service/internal/repo"
 	services "github.com/charlesonunze/grpc-nats-envoy/transaction-service/internal/service"
 	"github.com/charlesonunze/grpc-nats-envoy/transaction-service/pb"
-	"github.com/nats-io/nats.go"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 )
@@ -15,7 +14,7 @@ import (
 type server struct{}
 
 // New - returns an instance of the TransactionServiceRPCServer
-func New(nc *nats.Conn) pb.TransactionServiceRPCServer {
+func New() pb.TransactionServiceRPCServer {
 	return &server{}
 }
 
